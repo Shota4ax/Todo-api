@@ -35,7 +35,7 @@ app.get('/todos',function(req,res){
 });
 //: after params of request
 app.get('/todos/:id',function(req,res){
-   var todoId =parseInt(req.params.id);
+   var todoId =parseInt(req.params.id, 10);
     var matchTodo = _.findWhere(todos,{id:todoId});
 //    todos.forEach(function(todo){
 //       if(todo.id === todoId){
@@ -59,7 +59,17 @@ app.post('/todos',function(req,res){
     
     res.json(body);    
 });
-
+app.delete('/todos/:id',function(req,res){
+   var deleteId = parseInt(req.params.id, 10);
+    var deleteTodo = _.findWhere(todos,{id:deleteId});
+    if(deleteTodo){
+        todos=_.without(todos,deleteTodo);
+        res.json(deleteTodo);
+    }else{
+        res.status(404).json({"error":"No todo found with that id"});
+    }
+    
+});
 
 app.listen(PORT,function(){
    console.log("Express on port:"+PORT); 

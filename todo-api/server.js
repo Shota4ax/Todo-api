@@ -2,19 +2,27 @@ var express = require('express');
 
 var app = express();
 
-var todos=[{
-    id:1,
-    description: 'Work hard!',
-    completed: false
-},{
-    id:2,
-    description: 'Go to market',
-    completed: false
-},{
-    id:3,
-    description: 'Go for a walk',
-    completed: true
-}];
+var bodyParser = require('body-parser');
+app.use(bodyParser.json());
+//var todos=[{
+//    id:1,
+//    description: 'Work hard!',
+//    completed: false
+//},{
+//    id:2,
+//    description: 'Go to market',
+//    completed: false
+//},{
+//    id:3,
+//    description: 'Go for a walk with dog',
+//    completed: true
+//}];
+
+var todos = [];//array of todo items
+var todoId = 1;//id of every todo item
+
+
+
 var PORT = process.env.PORT || 3000;
 app.get('/',function(req,res){
    res.send("Todo-api initialize"); 
@@ -39,7 +47,13 @@ app.get('/todos/:id',function(req,res){
            res.status(404).send();
        }
 });
-
+app.post('/todos',function(req,res){
+   var body = req.body;
+    body.id = todoId++;
+    todos.push(body);
+    
+    res.json(body);    
+});
 
 
 app.listen(PORT,function(){

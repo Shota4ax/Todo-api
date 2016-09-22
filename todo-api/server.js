@@ -59,6 +59,35 @@ app.post('/todos',function(req,res){
     
     res.json(body);    
 });
+
+app.put('/todos/:id',function(req,res){
+   var body = _.pick(req.body,'description','completed');
+    var todoId = parseInt(req.params.id);
+    var updateTodo = _.findWhere(todos,{id:todoId});
+    var validAttributes = {};
+    if(!updateTodo){
+        return res.status(404).send();
+    }
+    
+    if(body.hasOwnProperty('completed') && _.isBoolean(body.completed)){
+        validAttributes.completed = body.completed;
+    }else if(body.hasOwnProperty('completed')){
+        return res.status(400).send();
+    }
+    
+    if(body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length !==0){
+        validAttributes.description = body.description;
+    }else if(body.hasOwnProperty('description')){
+        return res.status(400).send();
+    }
+        
+    _.extend(updateTodo, validAttributes);
+    res.json(updateTodo);
+    
+});
+
+
+
 app.delete('/todos/:id',function(req,res){
    var deleteId = parseInt(req.params.id, 10);
     var deleteTodo = _.findWhere(todos,{id:deleteId});

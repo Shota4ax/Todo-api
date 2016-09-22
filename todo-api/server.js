@@ -1,9 +1,10 @@
 var express = require('express');
 
 var app = express();
-
+var _ = require('underscore');
 var bodyParser = require('body-parser');
 app.use(bodyParser.json());
+
 //var todos=[{
 //    id:1,
 //    description: 'Work hard!',
@@ -35,12 +36,12 @@ app.get('/todos',function(req,res){
 //: after params of request
 app.get('/todos/:id',function(req,res){
    var todoId =parseInt(req.params.id);
-    var matchTodo;
-    todos.forEach(function(todo){
-       if(todo.id === todoId){
-           matchTodo = todo;
-       }
-    });
+    var matchTodo = _.findWhere(todos,{id:todoId});
+//    todos.forEach(function(todo){
+//       if(todo.id === todoId){
+//           matchTodo = todo;
+//       }
+//    });
     if(matchTodo){
         res.json(matchTodo.description);
     }else{
@@ -48,8 +49,12 @@ app.get('/todos/:id',function(req,res){
        }
 });
 app.post('/todos',function(req,res){
-   var body = req.body;
+   var body=_.pick(req.body, 'description','completed');
+   if(!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0){
+        return res.status(400).send(); //uncompleted code
+    }
     body.id = todoId++;
+    body.description = body.description.trim();
     todos.push(body);
     
     res.json(body);    

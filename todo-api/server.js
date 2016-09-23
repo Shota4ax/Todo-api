@@ -31,17 +31,22 @@ app.get('/',function(req,res){
 
 //GET request /todos
 app.get('/todos',function(req,res){
-    res.json(todos);
+    var queryParams = req.query;
+    var filterTodos = todos;
+    if(queryParams.hasOwnProperty('completed') && queryParams.completed === 'true'){
+        filterTodos = _.where(filterTodos,{completed : true});
+    }else if(queryParams.hasOwnProperty('completed') && queryParams.completed === 'false'){
+        filterTodos = _.where(filterTodos,{completed : false});
+    }
+    
+
+    res.json(filterTodos);
 });
 //: after params of request
 app.get('/todos/:id',function(req,res){
    var todoId =parseInt(req.params.id, 10);
     var matchTodo = _.findWhere(todos,{id:todoId});
-//    todos.forEach(function(todo){
-//       if(todo.id === todoId){
-//           matchTodo = todo;
-//       }
-//    });
+
     if(matchTodo){
         res.json(matchTodo.description);
     }else{

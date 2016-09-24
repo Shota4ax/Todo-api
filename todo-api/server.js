@@ -1,23 +1,11 @@
-var express = require('express');
 
-var app = express();
 var _ = require('underscore');
+var db = require('./db.js');//create new sqlite database
+var express = require('express');
+var app = express();
 var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 
-//var todos=[{
-//    id:1,
-//    description: 'Work hard!',
-//    completed: false
-//},{
-//    id:2,
-//    description: 'Go to market',
-//    completed: false
-//},{
-//    id:3,
-//    description: 'Go for a walk with dog',
-//    completed: true
-//}];
 
 var todos = [];//array of todo items
 var todoId = 1;//id of every todo item
@@ -41,7 +29,8 @@ app.get('/todos',function(req,res){
     
     if(queryParams.hasOwnProperty('q') && queryParams.q.length > 0){
         filterTodos = _.filter(filterTodos,function(todo){
-           return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1; 
+           return todo.description.toL
+           owerCase().indexOf(queryParams.q.toLowerCase()) > -1; 
         });
     }
 
@@ -60,14 +49,20 @@ app.get('/todos/:id',function(req,res){
 });
 app.post('/todos',function(req,res){
    var body=_.pick(req.body, 'description','completed');
-   if(!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0){
-        return res.status(400).send(); //uncompleted code
-    }
-    body.id = todoId++;
-    body.description = body.description.trim();
-    todos.push(body);
+    db.todo.create(body).then(function(todo){
+        res.json(todo.toJSON());
+    },function(e){
+        res.status(400).json(e);
+    });
     
-    res.json(body);    
+//   if(!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0){
+//        return res.status(400).send(); //uncompleted code
+//    }
+//    body.id = todoId++;
+//    body.description = body.description.trim();
+//    todos.push(body);
+//    
+//    res.json(body);    
 });
 
 app.put('/todos/:id',function(req,res){
@@ -110,6 +105,9 @@ app.delete('/todos/:id',function(req,res){
     
 });
 
-app.listen(PORT,function(){
-   console.log("Express on port:"+PORT); 
+db.sequelize.sync().then(function(){
+    app.listen(PORT,function(){
+        console.log("Express on port:"+PORT); 
+    });    
 });
+
